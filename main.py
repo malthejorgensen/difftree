@@ -1,18 +1,30 @@
 import argparse
 import os
 import re
+import stat
 from collections import namedtuple
+from itertools import cycle
 
-DirEntry = namedtuple('DirEntry', ['file_path', 'file_type', 'file_hash', 'file_size', 'file_permissions'])
-DirEntryProps = namedtuple('DirEntry', ['file_type', 'file_hash', 'file_size', 'file_permissions'])
+DirEntry = namedtuple(
+    'DirEntry', ['file_path', 'file_type', 'file_hash', 'file_size', 'file_perms']
+)
+DirEntryProps = namedtuple(
+    'DirEntry', ['file_type', 'file_hash', 'file_size', 'file_perms']
+)
 
 
-def build_dirtree(base_path, return_hashes=False, return_sizes=False, return_perms=False, exclude_pattern=None):
+def build_dirtree(
+    base_path,
+    return_hashes=False,
+    return_sizes=False,
+    return_perms=False,
+    exclude_pattern=None,
+):
     '''Build a `set` of tuples for each file under the given filepath
 
     The tuples are of the form
 
-        (file_path, file_type, file_hash, file_size, file_permissions)
+        (file_path, file_type, file_hash, file_size, file_perms)
 
     For directories `file_hash` is always `None`.
     '''
@@ -23,7 +35,7 @@ def build_dirtree(base_path, return_hashes=False, return_sizes=False, return_per
 
         for entry, entry_type in dir_entries:
             full_rel_path = os.path.join(dirpath, entry)
-            path = full_rel_path[len(base_path):]
+            path = full_rel_path[len(base_path) :]
 
             if exclude_pattern and exclude_pattern.match(path):
                 continue
@@ -33,7 +45,7 @@ def build_dirtree(base_path, return_hashes=False, return_sizes=False, return_per
                 'file_type': entry_type,
                 'file_hash': None,
                 'file_size': stat.st_size if return_sizes and entry_type == 'F' else None,
-                'file_permissions': stat.mode if return_perms else None,
+                'file_perms': stat.st_mode if return_perms else None,
             }
             dir_entry = DirEntry(
                 file_path=path,
@@ -60,6 +72,27 @@ def pp_file_size(size_bytes):
         unit = 'GiB'
 
     return f'{value:.2f} {unit}'
+
+
+def pp_file_perms(perms):
+    CONST_FILE_PERMS = [
+        stat.S_IRUSR,
+        stat.S_IWUSR,
+        stat.S_IXUSR,
+        stat.S_IRGRP,
+        stat.S_IWGRP,
+        stat.S_IXGRP,
+        stat.S_IROTH,
+        stat.S_IWOTH,
+        stat.S_IXOTH,
+    ]
+    result = ''
+    for char, stat_const in zip(cycle(['r', 'w', 'x']), CONST_FILE_PERMS):
+        if perms & stat_const != 0:
+            result += char
+        else:
+            result += '-'
+    return result
 
 
 def entry():
@@ -97,10 +130,14 @@ def entry():
             file_size1 = pp_file_size(tree1[path].file_size)
             file_size2 = pp_file_size(tree2[path].file_size)
             print(f'{path} ({file_size1}) <-> {path} ({file_size2})')
-        elif tree1[path].hash != tree2[path].hash:
-            print(f'{path} ({hash1}) <-> {path} {hash2}')
-        elif tree1[path].perms != tree2[path].perms:
-            print(f'{path} ({perms1}) <-> {path} {perms2}')
+        elif tree1[path].file_hash != tree2[path].file_hash:
+            file_hash1 = tree1[path].file_hash
+            file_hash2 = tree2[path].file_hash
+            print(f'{path} ({file_hash1}) <-> {path} ({file_hash2})')
+        elif tree1[path].file_perms != tree2[path].file_perms:
+            file_perms1 = pp_file_perms(tree1[path].file_perms)
+            file_perms2 = pp_file_perms(tree2[path].file_perms)
+            print(f'{path} ({file_perms1}) <-> {path} ({file_perms2})')
 
 
 if __name__ == '__main__':
