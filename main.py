@@ -70,7 +70,7 @@ def entry():
     # argparser.add_argument('--strict', action='store_true', help='Error on missing attributes')
     argparser.add_argument('-p', '--check-perms', action='store_true', help='Diff file permissions')
     argparser.add_argument('-s', '--check-sizes', action='store_true', help='Diff file sizes')
-    argparser.add_argument('-e', '--exclude')
+    argparser.add_argument('-e', '--exclude', help='Exclude files matching this regex', metavar='exclude_regex')
     # fmt: on
 
     args = argparser.parse_args()
