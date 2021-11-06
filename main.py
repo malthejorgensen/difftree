@@ -44,7 +44,9 @@ def build_dirtree(
             file_props = {
                 'file_type': entry_type,
                 'file_hash': None,
-                'file_size': stat.st_size if return_sizes and entry_type == 'F' else None,
+                'file_size': stat.st_size
+                if return_sizes and entry_type == 'F'
+                else None,
                 'file_perms': stat.st_mode if return_perms else None,
             }
             dir_entry = DirEntry(
@@ -58,17 +60,17 @@ def build_dirtree(
 
 
 def pp_file_size(size_bytes):
-    if size_bytes < 2**10:
+    if size_bytes < 2 ** 10:
         value = size_bytes
         unit = 'bytes'
-    elif size_bytes < 2**20:
-        value = size_bytes / 2**10
+    elif size_bytes < 2 ** 20:
+        value = size_bytes / 2 ** 10
         unit = 'KiB'
-    elif size_bytes < 2**30:
-        value = size_bytes / 2**20
+    elif size_bytes < 2 ** 30:
+        value = size_bytes / 2 ** 20
         unit = 'MiB'
     else:
-        value = size_bytes / 2**30
+        value = size_bytes / 2 ** 30
         unit = 'GiB'
 
     return f'{value:.2f} {unit}'
@@ -112,8 +114,18 @@ def entry():
 
     re_exclude = re.compile(args.exclude) if args.exclude else None
 
-    set_tree1, tree1 = build_dirtree(dir1, return_sizes=args.check_sizes, return_perms=args.check_perms, exclude_pattern=re_exclude)
-    set_tree2, tree2 = build_dirtree(dir2, return_sizes=args.check_sizes, return_perms=args.check_perms, exclude_pattern=re_exclude)
+    set_tree1, tree1 = build_dirtree(
+        dir1,
+        return_sizes=args.check_sizes,
+        return_perms=args.check_perms,
+        exclude_pattern=re_exclude,
+    )
+    set_tree2, tree2 = build_dirtree(
+        dir2,
+        return_sizes=args.check_sizes,
+        return_perms=args.check_perms,
+        exclude_pattern=re_exclude,
+    )
 
     diff = set_tree1 - set_tree2
 
