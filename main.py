@@ -64,7 +64,7 @@ def pp_file_size(size_bytes):
 
 def entry():
     # fmt: off
-    argparser = argparse.ArgumentParser(description='A JSON-biased alternative to jq')
+    argparser = argparse.ArgumentParser(description='Easily compare the contents of two directories')
     argparser.add_argument('dir1', help='The jason command to run on the JSON')
     argparser.add_argument('dir2', help='The files to transform')
     # argparser.add_argument('--strict', action='store_true', help='Error on missing attributes')
