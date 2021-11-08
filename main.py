@@ -134,7 +134,7 @@ def entry():
         exclude_pattern=re_exclude,
     )
 
-    diff = set_tree1 - set_tree2
+    diff = set_tree1.symmetric_difference(set_tree2)
 
     if len(set_tree1) == 0 and len(set_tree2) == 0:
         print('Both directories are empty')
