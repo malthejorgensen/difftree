@@ -143,13 +143,15 @@ def entry():
         print('Directories are identical')
         return
 
+    width = len(dir1)
     print(f'{dir1} <-> {dir2}')
     for dir_entry in sorted(diff):
         path = dir_entry.file_path
         if path in tree1 and path not in tree2:
-            print(f'{path}  -> ')
+            padded_path = (path + ' ' * width)[:max(width, len(path))]
+            print(f'{padded_path}  -> ')
         elif path not in tree1 and path in tree2:
-            print(f'       <-  {path}')
+            print(' ' * width + f' <-  {path}')
         elif tree1[path].file_type != tree2[path].file_type:
             print(f'{path} ({file_type1}) <-> {path} ({file_type2})')
         elif tree1[path].file_size != tree2[path].file_size:
