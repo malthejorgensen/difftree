@@ -114,6 +114,13 @@ def entry():
 
     re_exclude = re.compile(args.exclude) if args.exclude else None
 
+    if not os.path.exists(dir1):
+        print(f'"{dir1}" does not exist')
+        return
+    if not os.path.exists(dir2):
+        print(f'"{dir2}" does not exist')
+        return
+
     set_tree1, tree1 = build_dirtree(
         dir1,
         return_sizes=args.check_sizes,
