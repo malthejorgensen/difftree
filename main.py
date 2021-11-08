@@ -136,6 +136,13 @@ def entry():
 
     diff = set_tree1 - set_tree2
 
+    if len(set_tree1) == 0 and len(set_tree2) == 0:
+        print('Both directories are empty')
+        return
+    elif len(diff) == 0:
+        print('Directories are identical')
+        return
+
     print(f'{dir1} <-> {dir2}')
     for dir_entry in sorted(diff):
         path = dir_entry.file_path
