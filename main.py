@@ -85,7 +85,10 @@ def pp_file_size(size_bytes):
         value = size_bytes / 2 ** 30
         unit = 'GiB'
 
-    return f'{value:.2f} {unit}'
+    if unit == 'bytes':
+        return f'{value} {unit}'
+    else:
+        return f'{value:.2f} {unit}'
 
 
 def pp_file_perms(perms):
