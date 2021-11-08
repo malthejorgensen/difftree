@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import os
 import re
 import stat
@@ -11,6 +12,17 @@ DirEntry = namedtuple(
 DirEntryProps = namedtuple(
     'DirEntry', ['file_type', 'file_hash', 'file_size', 'file_perms']
 )
+
+
+def file_hash(path):
+    with open(path, 'rb') as f:
+        hash = hashlib.blake2b()
+        while True:
+            chunk = f.read(8192)
+            if not chunk:
+                break
+            hash.update(chunk)
+    return hash.hexdigest()
 
 
 def build_dirtree(
@@ -43,7 +55,7 @@ def build_dirtree(
             stat = os.stat(full_rel_path)
             file_props = {
                 'file_type': entry_type,
-                'file_hash': None,
+                'file_hash': file_hash(full_rel_path) if return_hashes else None,
                 'file_size': stat.st_size
                 if return_sizes and entry_type == 'F'
                 else None,
@@ -105,6 +117,7 @@ def entry():
     # argparser.add_argument('--strict', action='store_true', help='Error on missing attributes')
     argparser.add_argument('-p', '--check-perms', action='store_true', help='Diff file permissions')
     argparser.add_argument('-s', '--check-sizes', action='store_true', help='Diff file sizes')
+    argparser.add_argument('-z', '--check-hashes', action='store_true', help='Diff file hashes')
     argparser.add_argument('-e', '--exclude', help='Exclude files matching this regex', metavar='exclude_regex')
     # fmt: on
 
@@ -125,12 +138,14 @@ def entry():
         dir1,
         return_sizes=args.check_sizes,
         return_perms=args.check_perms,
+        return_hashes=args.check_hashes,
         exclude_pattern=re_exclude,
     )
     set_tree2, tree2 = build_dirtree(
         dir2,
         return_sizes=args.check_sizes,
         return_perms=args.check_perms,
+        return_hashes=args.check_hashes,
         exclude_pattern=re_exclude,
     )
 
@@ -167,7 +182,7 @@ def entry():
         elif tree1[path].file_hash != tree2[path].file_hash:
             file_hash1 = tree1[path].file_hash
             file_hash2 = tree2[path].file_hash
-            print(f'{path} ({file_hash1}) <-> {path} ({file_hash2})')
+            print(f'{path} ({file_hash1[:6]}) <-> {path} ({file_hash2[:6]})')
         elif tree1[path].file_perms != tree2[path].file_perms:
             file_perms1 = pp_file_perms(tree1[path].file_perms)
             file_perms2 = pp_file_perms(tree2[path].file_perms)
