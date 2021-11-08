@@ -145,8 +145,14 @@ def entry():
 
     width = len(dir1)
     print(f'{dir1} <-> {dir2}')
+    visited = set()
     for dir_entry in sorted(diff):
         path = dir_entry.file_path
+        if path in visited:
+            continue
+        else:
+            visited.add(path)
+
         if path in tree1 and path not in tree2:
             padded_path = (path + ' ' * width)[:max(width, len(path))]
             print(f'{padded_path}  -> ')
