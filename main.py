@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import os
 import re
+import shutil
 import stat
 from collections import namedtuple
 from itertools import cycle
@@ -113,6 +114,18 @@ def pp_file_perms(perms):
     return result
 
 
+def print_diff(path1, op, path2, width, extras1=None, extras2=None):
+    if extras1:
+        path1 = f'{path1} ({extras1})'
+        path1 = path1.ljust(width)
+    if extras2:
+        path2 = f'{path2} ({extras2})'
+        # path2 = path2.ljust(width)
+
+    path1 = path1.ljust(width)
+    print(f'{path1} {op} {path2}')
+
+
 def entry():
     # fmt: off
     argparser = argparse.ArgumentParser(description='Easily compare the contents of two directories')
@@ -162,8 +175,10 @@ def entry():
         print('Directories are identical')
         return
 
-    width = len(dir1)
-    print(f'{dir1} <-> {dir2}')
+    width = max(max(len(e.file_path) for e in diff), len(dir1))
+    # Don't go beyond half the width of the terminal
+    width = min(width, shutil.get_terminal_size().columns // 2)
+    print_diff(dir1, '<->', dir2, width)
     visited = set()
     for dir_entry in sorted(diff):
         path = dir_entry.file_path
@@ -173,26 +188,31 @@ def entry():
             visited.add(path)
 
         if path in tree1 and path not in tree2:
-            padded_path = (path + ' ' * width)[:max(width, len(path))]
-            print(f'{padded_path}  -> ')
+            print_diff(path, ' ->', '', width)
         elif path not in tree1 and path in tree2:
-            print(' ' * width + f' <-  {path}')
+            print_diff('', '<- ', path, width)
         elif tree1[path].file_type != tree2[path].file_type:
             file_type1 = tree1[path].file_type
             file_type2 = tree2[path].file_type
-            print(f'{path} ({file_type1}) <-> {path} ({file_type2})')
+            print_diff(
+                path1, '<->', path2, width, extras1=file_type1, extras2=file_type2
+            )
         elif tree1[path].file_size != tree2[path].file_size:
             file_size1 = pp_file_size(tree1[path].file_size)
             file_size2 = pp_file_size(tree2[path].file_size)
-            print(f'{path} ({file_size1}) <-> {path} ({file_size2})')
+            print_diff(path, '<->', path, width, extras1=file_size1, extras2=file_size2)
         elif tree1[path].file_hash != tree2[path].file_hash:
             file_hash1 = tree1[path].file_hash
             file_hash2 = tree2[path].file_hash
-            print(f'{path} ({file_hash1[:6]}) <-> {path} ({file_hash2[:6]})')
+            print_diff(
+                path, '<->', path, width, extras1=file_hash1[:6], extras2=file_hash2[:6]
+            )
         elif tree1[path].file_perms != tree2[path].file_perms:
             file_perms1 = pp_file_perms(tree1[path].file_perms)
             file_perms2 = pp_file_perms(tree2[path].file_perms)
-            print(f'{path} ({file_perms1}) <-> {path} ({file_perms2})')
+            print_diff(
+                path, '<->', path, width, extras1=file_perms1, extras2=file_perms2
+            )
 
 
 if __name__ == '__main__':
