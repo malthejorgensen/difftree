@@ -178,6 +178,8 @@ def entry():
         elif path not in tree1 and path in tree2:
             print(' ' * width + f' <-  {path}')
         elif tree1[path].file_type != tree2[path].file_type:
+            file_type1 = tree1[path].file_type
+            file_type2 = tree2[path].file_type
             print(f'{path} ({file_type1}) <-> {path} ({file_type2})')
         elif tree1[path].file_size != tree2[path].file_size:
             file_size1 = pp_file_size(tree1[path].file_size)
