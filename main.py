@@ -116,8 +116,8 @@ def pp_file_perms(perms):
 def entry():
     # fmt: off
     argparser = argparse.ArgumentParser(description='Easily compare the contents of two directories')
-    argparser.add_argument('dir1', help='The jason command to run on the JSON')
-    argparser.add_argument('dir2', help='The files to transform')
+    argparser.add_argument('dir1')
+    argparser.add_argument('dir2')
     # argparser.add_argument('--strict', action='store_true', help='Error on missing attributes')
     argparser.add_argument('-p', '--check-perms', action='store_true', help='Diff file permissions')
     argparser.add_argument('-s', '--check-sizes', action='store_true', help='Diff file sizes')
