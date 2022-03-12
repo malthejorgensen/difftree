@@ -114,6 +114,28 @@ def pp_file_perms(perms):
     return result
 
 
+def filter_nested_dirs(diff):
+    '''Remove files from `diff` that are nested inside directories that themselves
+    are part of `diff`.'''
+    filtered_diff = []
+    last_dir = None
+    for dir_entry in sorted(
+        diff,
+        key=lambda e: e.file_path + '/' if e.file_type == 'D' else e.file_path,
+    ):
+        path = dir_entry.file_path
+        if last_dir and path.startswith(last_dir):
+            continue
+
+        filtered_diff.append(dir_entry)
+
+        if dir_entry.file_type == 'D':
+            path += '/'
+            last_dir = path
+
+    return filtered_diff
+
+
 def print_diff(path1, op, path2, width, extras1=None, extras2=None):
     if extras1:
         path1 = f'{path1} ({extras1})'
@@ -135,6 +157,7 @@ def entry():
     argparser.add_argument('-p', '--check-perms', action='store_true', help='Diff file permissions')
     argparser.add_argument('-s', '--check-sizes', action='store_true', help='Diff file sizes')
     argparser.add_argument('-z', '--check-hashes', action='store_true', help='Diff file hashes')
+    argparser.add_argument('-d', '--dir-norecurse', action='store_true', help='Show missing directories as a single entry (don\'t show files in the directory)')
     argparser.add_argument('-e', '--exclude', help='Exclude files matching this regex', metavar='exclude_regex')
     # fmt: on
 
@@ -174,6 +197,9 @@ def entry():
     elif len(diff) == 0:
         print('Directories are identical')
         return
+
+    if args.dir_norecurse:
+        diff = filter_nested_dirs(diff)
 
     width = max(max(len(e.file_path) for e in diff), len(dir1))
     # Don't go beyond half the width of the terminal
