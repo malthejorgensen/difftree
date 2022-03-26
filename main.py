@@ -139,7 +139,6 @@ def filter_nested_dirs(diff):
 def print_diff(path1, op, path2, width, extras1=None, extras2=None):
     if extras1:
         path1 = f'{path1} ({extras1})'
-        path1 = path1.ljust(width)
     if extras2:
         path2 = f'{path2} ({extras2})'
         # path2 = path2.ljust(width)
@@ -202,6 +201,14 @@ def entry():
         diff = filter_nested_dirs(diff)
 
     width = max(max(len(e.file_path) for e in diff), len(dir1))
+    max_path_length = max(len(e.file_path) for e in diff)
+    if args.check_perms:
+        # Include permissions in width
+        max_path_length += len(' (xxxxxxxxx)')
+    if args.check_hashes:
+        # Include hash in width
+        max_path_length += len(' (xxxxxx)')
+    width = max(max_path_length, len(dir1))
     # Don't go beyond half the width of the terminal
     width = min(width, shutil.get_terminal_size().columns // 2)
     print_diff(dir1, '<->', dir2, width)
