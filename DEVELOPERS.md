@@ -1,6 +1,6 @@
 Install
 -------
-You can install `dirdiff` directly from the source like so:
+You can install `difftree` directly from the source like so:
 
     pipx install .
 

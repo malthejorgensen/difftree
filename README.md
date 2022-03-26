@@ -1,9 +1,9 @@
-dirdiff
+difftree
 =======
-dirdiff is a tool that diffs two directories. It recursively walks through the directories
+difftree is a tool that diffs two directories. It recursively walks through the directories
 and lists files that are missing on either side.
 
-By default `dirdiff` only checks whether a file is present or not, so files
+By default `difftree` only checks whether a file is present or not, so files
 present on both sides but with different file sizes, permissions or content
 will not be listed. However, checking any of those can be enabled via
 the `-s`, `-p`, and `-z` flags respectively.
@@ -11,7 +11,7 @@ the `-s`, `-p`, and `-z` flags respectively.
 Usage
 -----
 
-    > dirdiff dir-a/ dir-b/
+    > difftree dir-a/ dir-b/
     dir-a/                 <-> dir-b/
                            <-  file-only-in-dirb.txt
     file-only-in-dir-a.txt  ->
@@ -28,9 +28,9 @@ The following options are available:
 
 Install
 -------
-The recommended way to install `dirdiff` is via [pipx]:
+The recommended way to install `difftree` is via [pipx]:
 
-    pipx dirdiff
+    pipx difftree
 
 Alternatives
 ------------

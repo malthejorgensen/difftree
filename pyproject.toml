@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dirdiff"
+name = "difftree"
 version = "0.1.0"
 description = "Diff two directories recursively"
 authors = ["Malthe Jørgensen <malthe.jorgensen@gmail.com>"]
@@ -16,4 +16,4 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.scripts]
-dirdiff = "dirdiff.main:entry"
+difftree = "difftree.main:entry"
