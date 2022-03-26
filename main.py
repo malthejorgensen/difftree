@@ -213,7 +213,10 @@ def entry():
     width = min(width, shutil.get_terminal_size().columns // 2)
     print_diff(dir1, '<->', dir2, width)
     visited = set()
-    for dir_entry in sorted(diff):
+    for dir_entry in sorted(
+        diff,
+        key=lambda e: e.file_path + '/' if e.file_type == 'D' else e.file_path,
+    ):
         path = dir_entry.file_path
         if path in visited:
             continue
@@ -221,10 +224,20 @@ def entry():
             visited.add(path)
 
         if path in tree1 and path not in tree2:
+            if dir_entry.file_type == 'D':
+                path += '/'
             print_diff(path, ' ->', '', width)
         elif path not in tree1 and path in tree2:
+            if dir_entry.file_type == 'D':
+                path += '/'
             print_diff('', '<- ', path, width)
         elif tree1[path].file_type != tree2[path].file_type:
+            path1 = path
+            path2 = path
+            if tree1[path].file_type == 'D':
+                path1 += '/'
+            if tree2[path].file_type == 'D':
+                path2 += '/'
             file_type1 = tree1[path].file_type
             file_type2 = tree2[path].file_type
             print_diff(
